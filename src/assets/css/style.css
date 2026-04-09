@@ -1,0 +1,816 @@
+/* =====================
+   RESET & BASE
+===================== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #0f0f0f, #1a1a1a, #b1ada8);
+  color: #f1f1f1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.8s ease;
+}
+
+/* =====================
+   NAVBAR
+===================== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 50px;
+  width: 100%;
+
+  background: rgba(15, 15, 15, 0.85);
+  border-bottom: 1px solid #222;
+  backdrop-filter: blur(8px);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* MENU */
+.nav-menu {
+  display: flex;
+  gap: 28px;
+}
+
+.nav-menu a {
+  position: relative;
+  font-size: 14px;
+  text-decoration: none;
+  color: #aaa;
+  padding: 4px 0;
+  transition: 0.25s;
+}
+
+.nav-menu a:hover {
+  color: #fff;
+}
+
+.nav-menu a::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, white, transparent);
+  transition: 0.25s;
+}
+
+.nav-menu a:hover::after {
+  width: 100%;
+}
+
+.nav-menu a.active {
+  color: #fff;
+}
+
+/* BUTTON */
+.btn-contact-nav {
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+
+  border: 1px solid #444;
+  color: #ddd;
+  text-decoration: none;
+
+  transition: 0.25s;
+}
+
+.btn-contact-nav:hover {
+  background: #eee;
+  color: #111;
+}
+
+/* =====================
+   HERO
+===================== */
+.hero-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+
+  margin: 40px 60px;
+  padding: 40px;
+  border-radius: 15px;
+
+  background: linear-gradient(145deg, #1a1a1a, #121212);
+  border: 1px solid #222;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* LEFT */
+.hero-left {
+  flex: 1;
+}
+
+.hero-left h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.hero-left p {
+  color: #aaa;
+  line-height: 1.6;
+}
+
+/* BUTTONS */
+.hero-buttons {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.btn-contact {
+  padding: 10px 22px;
+  border-radius: 25px;
+
+  background: #f1f1f1;
+  color: #111;
+  text-decoration: none;
+  font-weight: 500;
+
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.05);
+  transition: 0.25s;
+}
+
+.btn-contact:hover {
+  transform: translateY(-2px);
+  background: #ddd;
+}
+
+.download {
+  text-decoration: none;
+  color: #ccc;
+}
+
+/* =====================
+   SOCIAL
+===================== */
+.social {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.social a {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #1f1f1f;
+  border: 1px solid #333;
+
+  text-decoration: none;
+  transition: 0.25s;
+}
+
+.social i {
+  color: #ccc;
+  transition: 0.25s;
+}
+
+.social a:hover {
+  transform: translateY(-3px);
+  background: #2a2a2a;
+}
+
+.social a:hover i {
+  color: #fff;
+}
+
+/* =====================
+   CARD
+===================== */
+.hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  width: 300px;
+  border-radius: 12px;
+  overflow: hidden;
+
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.card img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 12px;
+  text-align: center;
+}
+
+.card h5 {
+  margin-bottom: 5px;
+}
+
+.card p {
+  color: #aaa;
+}
+
+/* =====================
+   PROJECT SECTION
+===================== */
+.project-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover; /* Menghindari gambar gepeng */
+  border-radius: 8px 8px 0 0;
+  background-color: #222; /* Warna latar jika gambar gagal load */
+}
+
+.projects {
+  margin: 60px auto;
+  max-width: 1100px;
+  padding: 20px;
+}
+
+.projects h3 {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  padding: 20px;
+  border-radius: 12px;
+
+  background: #1c1c1c;
+  border: 1px solid #2a2a2a;
+
+  transition: 0.3s;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  border-color: #444;
+}
+
+.project-card h4 {
+  margin-bottom: 10px;
+}
+
+.project-card p {
+  color: #aaa;
+}
+
+/* =====================
+   CONTACT CTA
+===================== */
+.contact {
+  text-align: center;
+  margin: 80px 0;
+}
+
+.contact h3 {
+  margin-bottom: 20px;
+}
+
+/* =====================
+   FOOTER
+===================== */
+.footer {
+  margin-top: auto;
+  text-align: center;
+
+  padding: 20px 20px; /* ⬅️ pas: nggak besar, nggak kecil */
+
+  border-top: 1px solid #222;
+  background: rgba(15, 15, 15, 0.6);
+
+  font-size: 13px;
+  color: #999;
+  letter-spacing: 0.5px;
+}
+/* =====================
+   ANIMATION
+===================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px 20px;
+  }
+
+  .hero-container {
+    flex-direction: column;
+    margin: 20px;
+    padding: 25px;
+  }
+
+  .hero-left {
+    text-align: center;
+  }
+
+  .hero-buttons,
+  .social {
+    justify-content: center;
+  }
+
+  .hero-right {
+    margin-top: 20px;
+  }
+}
+
+/* ===== ADD PROJECT (FINAL CLEAN) ===== */
+
+.add-project {
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* TITLE */
+.add-project h1 {
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* FORM CARD */
+.add-project .form-box {
+  width: 400px;
+  padding: 20px;
+  border-radius: 10px;
+
+  background: rgba(28, 28, 28, 0.6);
+  border: 1px solid #2a2a2a;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* FLEX FORM */
+.add-project .form-flex {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* LABEL */
+.add-project .form-flex label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ddd;
+}
+
+/* DATE ROW */
+.add-project .row {
+  display: flex;
+  gap: 10px;
+}
+
+.add-project .col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* CHECKBOX */
+.add-project .checkbox-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.add-project .checkbox-row label {
+  width: 45%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 13px;
+  color: #ccc;
+
+  background: #141414;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.add-project .checkbox-row label:hover {
+  background: #1f1f1f;
+}
+
+/* DATE INPUT */
+.add-project input[type="date"] {
+  border: 1px solid #444;
+}
+
+/* ICON DATE */
+.add-project input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+/* BUTTON */
+.add-project .btn-submit {
+  align-self: flex-end;
+  padding: 6px 18px;
+  border-radius: 15px;
+  font-size: 12px;
+
+  background: #f1f1f1;
+  color: #111;
+  border: none;
+
+  transition: 0.2s;
+}
+
+.add-project .btn-submit:hover {
+  background: #ddd;
+  transform: translateY(-1px);
+}
+
+/* HANYA INPUT TEXT, DATE, FILE */
+.add-project .form-flex input:not([type="checkbox"]),
+.add-project .form-flex textarea {
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  color: #eee;
+  font-size: 13px;
+  width: 100%;
+  transition: 0.2s;
+}
+
+.add-project textarea {
+  min-height: 100px;
+}
+
+@media (max-width: 480px) {
+  .add-project .form-box {
+    width: 90%;
+  }
+
+  .add-project .checkbox-row label {
+    width: 100%;
+  }
+}
+
+.form-flex textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+textarea,
+input {
+  word-break: break-word;
+}
+
+textarea {
+  width: 100%;
+  max-width: 100%;
+  resize: vertical;
+}
+
+.add-project input:hover,
+.add-project textarea:hover {
+  border-color: #555;
+}
+
+.add-project input,
+.add-project textarea,
+.add-project .btn-submit {
+  transition: all 0.2s ease;
+}
+
+.add-project label {
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+/* JS Picture */
+#contents {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 0;
+  width: 100%;
+}
+
+.project-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 50px;
+  text-align: center;
+  color: #fff; /* Pastikan warna kontras dengan background body-mu */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 350px));
+  gap: 30px;
+  width: 90%;
+  max-width: 1200px;
+  justify-content: center; /* Menjaga kartu tetap di tengah */
+  margin: 0 auto;
+}
+
+.project-card {
+  background-color: #000; /* Kartu Hitam */
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid #333;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  border-color: #444;
+}
+
+.project-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.project-card h4 {
+  margin-bottom: 8px;
+  font-size: 1.3rem;
+}
+
+.project-card .duration {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.project-card .desc-text {
+  color: #ddd;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  overflow-wrap: break-word;
+}
+
+.tech-icons {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #2563eb;
+  display: flex;
+  gap: 12px;
+}
+
+.card-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 14px;
+}
+
+.btn-delete {
+  background: #222;
+  color: #fff;
+}
+
+.btn-edit:hover {
+  background: #e0e0e0;
+}
+
+.btn-delete:hover {
+  background: #ff4d4d;
+  color: #fff;
+}
+
+/* 1. Judul Project - Dibuat lebih rapat ke bawah */
+.project-title {
+  text-align: center;
+  margin-top: 60px; /* Memberi ruang dari section di atasnya */
+  margin-bottom: 60px; /* Jarak yang kecil agar input filter terasa "dekat" dengan judul */
+  font-family: "Poppins", sans-serif;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* 2. Container Filter - Menghilangkan gap atas */
+.filter-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0; /* Memastikan tidak ada tabrakan margin */
+  margin-bottom: 40px; /* Jarak ke kartu project di bawahnya */
+  padding: 0 20px;
+}
+
+/* 3. Input Styling - Agar senada dengan desain kartu */
+.filter-container input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-family: "Poppins", sans-serif;
+  background-color: #fff;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Bayangan halus agar pop-out */
+}
+
+/* 4. Focus State */
+.filter-container input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2); /* Ring halus saat aktif */
+}
+
+/* 5. Message State (Empty Filter) */
+.no-project-message {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 0;
+  color: #bbb; /* Sedikit lebih terang agar terbaca di background gelap */
+}
+
+.no-project-message i {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+/* --- TEMA GELAP UNTUK SUKSES KONTAK --- */
+
+/* Wrapper untuk gradien latar belakang yang sangat halus */
+.dark-theme-wrapper {
+  background: linear-gradient(to bottom, #1a1a1a 0%, #111111 100%);
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Container untuk menjaga centering */
+.dark-success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  width: 100%;
+}
+
+/* Kartu Transparan Gelap */
+.success-card-dark {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.05
+  ); /* Sedikit transparan untuk efek modern */
+  backdrop-filter: blur(10px); /* Efek blur kaca, jika didukung browser */
+  padding: 50px 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Border tipis agar lebih berdefinisi */
+  transition: transform 0.3s ease;
+}
+
+.success-card-dark:hover {
+  transform: translateY(-5px); /* Efek melayang sedikit saat hover */
+}
+
+/* Icon (Warna Hijau Limau Cerah agar Kontras) */
+.icon-box-dark i {
+  font-size: 5rem;
+  color: #c9fb33; /* Warna hijau cerah khas tema dev yang mencolok */
+  margin-bottom: 25px;
+  filter: drop-shadow(
+    0 0 10px rgba(201, 251, 51, 0.3)
+  ); /* Sedikit efek pendaran */
+}
+
+/* Typography (Teks Putih Cerah & Abu-abu Lembut) */
+.success-title-dark {
+  font-weight: 700;
+  font-size: 2.5rem;
+  color: #ffffff;
+  margin-bottom: 15px;
+  letter-spacing: -1px;
+}
+
+.success-message-dark {
+  color: #b0b0b0; /* Abu-abu muda agar tidak terlalu terang */
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* Divider Tipis Gelap */
+.divider-dark {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 30px 0;
+}
+
+/* Tombol Custom (Putih dengan Teks Gelap, Kontras Tinggi) */
+.btn-back-dark {
+  display: inline-block;
+  padding: 12px 30px;
+  background-color: #ffffff; /* Latar belakang putih */
+  color: #111111; /* Teks gelap agar terbaca jelas */
+  text-decoration: none;
+  border-radius: 30px; /* Sangat membulat agar terlihat modern */
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+}
+
+.btn-back-dark:hover {
+  background-color: #f0f0f0;
+  color: #111111;
+  transform: scale(1.05); /* Membesar sedikit saat hover */
+  box-shadow: 0 6px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Menyesuaikan jarak di dalam layout utama, jika perlu */
+.main-content {
+  margin-top: 0 !important; /* Mencegah jarak tambahan dari navbar di halaman penuh ini */
+}

@@ -1,0 +1,19 @@
+<section class="add-project">
+  <h1>EDIT PROJECT</h1>
+  <div class="form-box">
+    {{! Form mengarah ke update-project dengan ID }}
+    <form
+      class="form-flex"
+      action="/update-project/{{project.id}}"
+      method="POST"
+    >
+      <label>Project Name</label>
+      <input type="text" name="title" value="{{project.title}}" required />
+
+      <label>Description</label>
+      <textarea name="content" required>{{project.content}}</textarea>
+
+      <button type="submit" class="btn-submit">Save Changes</button>
+    </form>
+  </div>
+</section>

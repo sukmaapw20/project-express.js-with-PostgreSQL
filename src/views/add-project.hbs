@@ -1,0 +1,40 @@
+<section class="add-project">
+  <h1>ADD MY PROJECT</h1>
+  <div class="form-box">
+    <form class="form-flex" action="/project" method="POST">
+      <label>Project Name</label>
+      <input type="text" name="title" required />
+
+      <div class="row">
+        <div class="col">
+          <label>Start Date</label>
+          <input type="date" name="startDate" required />
+        </div>
+        <div class="col">
+          <label>End Date</label>
+          <input type="date" name="endDate" required />
+        </div>
+      </div>
+
+      <label>Description</label>
+      <textarea name="content" required></textarea>
+
+      <label>Technologies</label>
+      <div class="row checkbox-row">
+        <label><input type="checkbox" name="node" value="true" />
+          Node Js</label>
+        <label><input type="checkbox" name="next" value="true" />
+          Next Js</label>
+        <label><input type="checkbox" name="react" value="true" />
+          React Js</label>
+        <label><input type="checkbox" name="ts" value="true" />
+          TypeScript</label>
+      </div>
+
+      <label>Upload Image</label>
+      <input type="file" name="image" />
+
+      <button type="submit" class="btn-submit">Submit</button>
+    </form>
+  </div>
+</section>

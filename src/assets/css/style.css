@@ -252,54 +252,124 @@ body {
 }
 
 /* =====================
-   PROJECT SECTION
+   PROJECT SECTION (REFINED)
 ===================== */
-.project-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover; /* Menghindari gambar gepeng */
-  border-radius: 8px 8px 0 0;
-  background-color: #222; /* Warna latar jika gambar gagal load */
-}
-
 .projects {
   margin: 60px auto;
-  max-width: 1100px;
+  max-width: 1200px;
   padding: 20px;
 }
 
 .projects h3 {
-  margin-bottom: 25px;
+  margin-bottom: 40px;
   text-align: center;
+  font-size: 2rem;
+  color: #fff;
 }
 
 .project-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  /* Menggunakan 320px agar di layar sedang tetap muat 3 kolom */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
 }
 
 .project-card {
-  padding: 20px;
+  padding: 15px;
   border-radius: 12px;
-
-  background: #1c1c1c;
+  background: #1c1c1c; /* Hitam elegan */
   border: 1px solid #2a2a2a;
-
-  transition: 0.3s;
+  transition: 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Memastikan semua card di row yang sama punya tinggi identik */
 }
 
 .project-card:hover {
-  transform: translateY(-5px);
-  border-color: #444;
+  transform: translateY(-8px);
+  border-color: #ff4b2b; /* Aksen orange-red sesuai brand-mu */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+.project-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  background-color: #222;
 }
 
 .project-card h4 {
-  margin-bottom: 10px;
+  margin: 15px 0 5px 0;
+  font-size: 1.4rem;
+  color: #fff;
 }
 
-.project-card p {
+.project-card .author {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.project-card .duration {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.project-card .description {
   color: #aaa;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  /* Membatasi teks maksimal 3 baris */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-card .tech-icons {
+  margin-top: auto; /* Trik kunci agar bagian bawah card selalu sejajar */
+  padding-top: 15px;
+  display: flex;
+  gap: 12px;
+  font-size: 1.2rem;
+  color: #2563eb;
+}
+
+/* Button Group di dalam Card */
+.card-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.btn-edit {
+  background: #fff;
+  color: #111;
+}
+.btn-delete {
+  background: #222;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+.btn-delete:hover {
+  background: #ff4d4d;
+  border-color: #ff4d4d;
 }
 
 /* =====================
@@ -813,4 +883,51 @@ textarea {
 /* Menyesuaikan jarak di dalam layout utama, jika perlu */
 .main-content {
   margin-top: 0 !important; /* Mencegah jarak tambahan dari navbar di halaman penuh ini */
+}
+
+/* Container Utama Detail */
+.container-detail {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+  color: #ffffff; /* Semua teks jadi putih */
+  font-family: "Poppins", sans-serif;
+}
+
+/* Judul Project */
+.container-detail h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 30px;
+}
+
+/* Gambar */
+.detail-left img {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+}
+
+/* Bagian Informasi (Duration & Tech) */
+.detail-right h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+.info-item,
+.tech-list {
+  color: #cccccc; /* Abu-abu terang agar tidak terlalu mencolok */
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Deskripsi Project - Ini yang tadi gelap */
+.description {
+  margin-top: 40px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #eeeeee; /* Putih bersih agar terbaca */
+  max-width: 800px;
 }

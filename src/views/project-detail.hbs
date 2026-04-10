@@ -1,0 +1,35 @@
+<div class="container-detail">
+  <h1 class="title">{{project.title}}</h1>
+
+  <div class="detail-content">
+    <div class="detail-left">
+      <img src="/assets/img/{{project.image}}" alt="{{project.title}}" />
+    </div>
+
+    <div class="detail-right">
+      <h3>Duration</h3>
+      <div class="info-item">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>{{project.start_date}} - {{project.end_date}}</span>
+      </div>
+      <div class="info-item">
+        <i class="fa-solid fa-clock"></i>
+        <span>{{project.duration}}</span>
+      </div>
+
+      <h3 style="margin-top: 30px;">Technologies</h3>
+      <div class="detail-tech">
+        {{#each project.technologies}}
+          <div class="tech-item">
+            {{! Kamu bisa tambahkan logika icon di sini jika mau }}
+            <span>{{this}}</span>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+
+  <div class="description">
+    <p>{{project.content}}</p>
+  </div>
+</div>

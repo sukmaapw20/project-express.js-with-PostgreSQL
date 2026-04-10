@@ -325,6 +325,7 @@ body {
   /* Membatasi teks maksimal 3 baris */
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3; /* Tambahkan baris ini */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

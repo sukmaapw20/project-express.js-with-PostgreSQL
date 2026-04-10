@@ -112,8 +112,17 @@ app.get("/project-detail/:id", async (req, res) => {
 /**
  * @section 4. ACTION ROUTES (CREATE, UPDATE, DELETE)
  */
+
+// --- CONTACT VALIDATION ---
 app.post("/contact", (req, res) => {
-  console.log("Message received:", req.body);
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    console.error("ALERT: Contact validation failed. Incomplete fields.");
+    return res.status(400).send("Please fill all required fields.");
+  }
+
+  console.log(`SUCCESS: Message received from ${name}`);
   res.redirect("/contact-success");
 });
 
@@ -121,10 +130,28 @@ app.get("/add-project", (req, res) =>
   res.render("add-project", { title: "Add Project" }),
 );
 
+// --- CREATE WITH VALIDATION & ERROR HANDLING ---
 app.post("/project", async (req, res) => {
   try {
     const data = formatProjectPayload(req.body);
-    const query = `INSERT INTO projects (title, content, start_date, end_date, duration, image, author_id, technologies) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+
+    // 1. Validation Logic
+    console.log("LOG: Validating project payload...");
+    if (!data.title || !data.content || !data.startDate || !data.endDate) {
+      console.error(
+        "ALERT: Project creation failed. Required fields are missing.",
+      );
+      return res.redirect("/add-project");
+    }
+
+    if (new Date(data.startDate) > new Date(data.endDate)) {
+      console.error("ALERT: Invalid date range. Start date is after end date.");
+      return res.redirect("/add-project");
+    }
+
+    // 2. Database Action
+    const query = `INSERT INTO projects (title, content, start_date, end_date, duration, image, author_id, technologies) 
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
     const values = [
       data.title,
       data.content,
@@ -135,10 +162,14 @@ app.post("/project", async (req, res) => {
       1,
       data.technologies,
     ];
+
     await pool.query(query, values);
+    console.log("SUCCESS: New project added to PostgreSQL database.");
     res.redirect("/project");
   } catch (err) {
-    res.redirect("/add-project");
+    // 3. Proper Error Handling
+    console.error(`ERROR: Critical failure in POST /project -> ${err.message}`);
+    res.status(500).send("Internal Server Error: Failed to save project.");
   }
 });
 
@@ -148,20 +179,40 @@ app.get("/edit-project/:id", async (req, res) => {
     const result = await pool.query("SELECT * FROM projects WHERE id = $1", [
       id,
     ]);
+
+    if (result.rows.length === 0) {
+      console.error(`ALERT: Project with ID ${id} was not found.`);
+      return res.redirect("/project");
+    }
+
     res.render("edit-project", {
       title: "Edit Project",
       project: result.rows[0],
     });
   } catch (err) {
+    console.error(
+      `ERROR: Database fetch failure in GET /edit-project -> ${err.message}`,
+    );
     res.redirect("/project");
   }
 });
 
+// --- UPDATE WITH VALIDATION & ERROR HANDLING ---
 app.post("/update-project/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const data = formatProjectPayload(req.body);
-    const query = `UPDATE projects SET title=$1, content=$2, start_date=$3, end_date=$4, duration=$5, image=$6, technologies=$7 WHERE id=$8`;
+
+    // Validation
+    if (!data.title || !data.content) {
+      console.error(
+        `ALERT: Update failed. Title or content cannot be empty for ID: ${id}`,
+      );
+      return res.redirect(`/edit-project/${id}`);
+    }
+
+    const query = `UPDATE projects SET title=$1, content=$2, start_date=$3, end_date=$4, duration=$5, image=$6, technologies=$7 
+                   WHERE id=$8`;
     const values = [
       data.title,
       data.content,
@@ -172,19 +223,44 @@ app.post("/update-project/:id", async (req, res) => {
       data.technologies,
       id,
     ];
-    await pool.query(query, values);
+
+    const result = await pool.query(query, values);
+
+    if (result.rowCount === 0) {
+      console.error(
+        `ALERT: No rows affected. Project ID ${id} might not exist.`,
+      );
+      return res.redirect("/project");
+    }
+
+    console.log(`SUCCESS: Project ID ${id} has been updated.`);
     res.redirect("/project");
   } catch (err) {
-    res.redirect("/project");
+    console.error(
+      `ERROR: Update operation failed in POST /update-project -> ${err.message}`,
+    );
+    res.status(500).send("Internal Server Error: Failed to update project.");
   }
 });
 
+// --- DELETE WITH ERROR HANDLING ---
 app.get("/delete-project/:id", async (req, res) => {
   try {
-    await pool.query("DELETE FROM projects WHERE id = $1", [req.params.id]);
+    const { id } = req.params;
+    const result = await pool.query("DELETE FROM projects WHERE id = $1", [id]);
+
+    if (result.rowCount === 0) {
+      console.error(`ALERT: Delete failed. Project ID ${id} was not found.`);
+    } else {
+      console.log(`SUCCESS: Project ID ${id} deleted from database.`);
+    }
+
     res.redirect("/project");
   } catch (err) {
-    res.redirect("/project");
+    console.error(
+      `ERROR: Delete operation failed in GET /delete-project -> ${err.message}`,
+    );
+    res.status(500).send("Internal Server Error: Failed to delete project.");
   }
 });
 

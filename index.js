@@ -2,6 +2,10 @@ import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
+import session from "express-session";
+import bcrypt from "bcrypt";
+import flash from "req-flash";
+import cookieParser from "cookie-parser";
 import pool from "./src/config/db.js";
 
 const app = express();
@@ -9,41 +13,87 @@ const port = 3000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * @section 1. BUSINESS LOGIC HELPERS
+ * @section 1. HELPERS
  */
 const calculateDuration = (start, end) => {
-  const diffInMs = Math.abs(new Date(end) - new Date(start));
-  const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
-  return diffInDays >= 30
-    ? `${Math.floor(diffInDays / 30)} months`
-    : `${diffInDays} days`;
+  const diff = Math.abs(new Date(end) - new Date(start));
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Less than a day";
+  return days >= 30 ? `${Math.floor(days / 30)} months` : `${days} days`;
 };
 
-const parseTechnologies = (body) => {
-  const techMap = {
+const formatProjectPayload = (body, authorId) => ({
+  title: body.title,
+  content: body.content,
+  start_date: body.startDate,
+  end_date: body.endDate,
+  duration: calculateDuration(body.startDate, body.endDate),
+  image: body.image || body.oldImage || "default-project.png",
+  author_id: authorId,
+  technologies: Object.keys({
     node: "Node Js",
     next: "Next Js",
     react: "React Js",
     ts: "TypeScript",
-  };
-  return Object.keys(techMap)
+  })
     .filter((key) => body[key])
-    .map((key) => techMap[key]);
-};
-
-const formatProjectPayload = (body) => ({
-  title: body.title,
-  content: body.content,
-  startDate: body.startDate,
-  endDate: body.endDate,
-  image: body.image || "default-project.png",
-  duration: calculateDuration(body.startDate, body.endDate),
-  technologies: parseTechnologies(body),
+    .map(
+      (key) =>
+        ({
+          node: "Node Js",
+          next: "Next Js",
+          react: "React Js",
+          ts: "TypeScript",
+        })[key],
+    ),
 });
 
 /**
- * @section 2. MIDDLEWARE & VIEW ENGINE
+ * @section 2. MIDDLEWARES
  */
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use("/assets", express.static(path.join(__dirname, "src/assets")));
+
+app.use(
+  session({
+    name: "manado-session",
+    secret: "manado_secret_2026",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
+  }),
+);
+
+app.use(flash());
+
+app.use((req, res, next) => {
+  const rawFlash = req.flash();
+  res.locals.isLogin = req.session.isLogin;
+  res.locals.user = req.session.user;
+  res.locals.messages = {
+    success: Array.isArray(rawFlash.success)
+      ? rawFlash.success
+      : rawFlash.success
+        ? [rawFlash.success]
+        : null,
+    error: Array.isArray(rawFlash.error)
+      ? rawFlash.error
+      : rawFlash.error
+        ? [rawFlash.error]
+        : null,
+  };
+  next();
+});
+
+const authGuard = (req, res, next) => {
+  if (!req.session.isLogin) {
+    req.flash("error", "Please login first!");
+    return res.redirect("/login");
+  }
+  next();
+};
+
 app.engine(
   "hbs",
   engine({
@@ -58,224 +108,176 @@ app.engine(
     },
   }),
 );
-
 app.set("view engine", "hbs");
 app.set("views", path.join(__dirname, "src/views"));
-app.use(express.urlencoded({ extended: false }));
-app.use("/assets", express.static(path.join(__dirname, "src/assets")));
 
 /**
- * @section 3. NAVIGATION ROUTES (READ)
+ * @section 3. AUTH & CONTACT ROUTES
  */
-app.get("/", (req, res) => res.render("home", { title: "Home | ManadoCode" }));
+app.get("/register", (req, res) =>
+  res.render("register", { title: "Register" }),
+);
+
+app.post("/register", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query(
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)",
+      [name, email, hashedPassword],
+    );
+    req.flash("success", "Registration successful!");
+    res.redirect("/login");
+  } catch (err) {
+    req.flash("error", "Registration failed.");
+    res.redirect("/register");
+  }
+});
+
+app.get("/login", (req, res) => res.render("login", { title: "Login" }));
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    if (
+      result.rows.length === 0 ||
+      !(await bcrypt.compare(password, result.rows[0].password))
+    ) {
+      req.flash("error", "Invalid email or password!");
+      return res.redirect("/login");
+    }
+    req.session.isLogin = true;
+    req.session.user = { id: result.rows[0].id, name: result.rows[0].name };
+    res.redirect("/project");
+  } catch (err) {
+    req.flash("error", "Login error occurred.");
+    res.redirect("/login");
+  }
+});
+
+app.get("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/login");
+});
+
 app.get("/contact", (req, res) =>
   res.render("contact", { title: "Contact Me" }),
 );
-app.get("/contact-success", (req, res) =>
-  res.render("contact-success", { title: "Success | ManadoCode" }),
-);
+
+// PERBAIKAN: Route contact post sekarang merender halaman sukses
+app.post("/contact", (req, res) => {
+  const { name, email, message } = req.body;
+  console.log(`Log: Message from ${name}: ${message}`);
+
+  res.render("contact-success", {
+    title: "Sent Successfully",
+    message: "Thank you for reaching out! I will get back to you soon.",
+  });
+});
+
+/**
+ * @section 4. PROJECTS (CRUD)
+ */
+app.get("/", (req, res) => res.render("home", { title: "Home" }));
 
 app.get("/project", async (req, res) => {
-  try {
-    const query = `SELECT projects.*, users.name AS author_name FROM projects LEFT JOIN users ON projects.author_id = users.id ORDER BY projects.id DESC`;
-    const result = await pool.query(query);
-    res.render("project", { title: "My Projects", projects: result.rows });
-  } catch (err) {
-    res.status(500).send("Failed to load projects.");
-  }
+  const result = await pool.query(
+    `SELECT p.*, u.name as author_name FROM projects p LEFT JOIN users u ON p.author_id = u.id ORDER BY p.id DESC`,
+  );
+  res.render("project", { title: "Projects", projects: result.rows });
 });
 
 app.get("/project-detail/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const query = `SELECT projects.*, users.name AS author_name FROM projects LEFT JOIN users ON projects.author_id = users.id WHERE projects.id = $1`;
+    const query = `SELECT p.*, u.name as author_name FROM projects p LEFT JOIN users u ON p.author_id = u.id WHERE p.id = $1`;
     const result = await pool.query(query, [id]);
-    const project = result.rows[0];
-    if (!project) return res.redirect("/project");
+    if (result.rows.length === 0)
+      return res.status(404).render("404", { title: "Project Not Found" });
 
-    const options = { day: "numeric", month: "short", year: "numeric" };
-    project.start_date = new Date(project.start_date).toLocaleDateString(
-      "en-US",
-      options,
-    );
-    project.end_date = new Date(project.end_date).toLocaleDateString(
-      "en-US",
-      options,
-    );
-
-    res.render("project-detail", { title: "Project Detail", project });
-  } catch (err) {
-    res.redirect("/project");
-  }
-});
-
-/**
- * @section 4. ACTION ROUTES (CREATE, UPDATE, DELETE)
- */
-
-// --- CONTACT VALIDATION ---
-app.post("/contact", (req, res) => {
-  const { name, email, message } = req.body;
-
-  if (!name || !email || !message) {
-    console.error("ALERT: Contact validation failed. Incomplete fields.");
-    return res.status(400).send("Please fill all required fields.");
-  }
-
-  console.log(`SUCCESS: Message received from ${name}`);
-  res.redirect("/contact-success");
-});
-
-app.get("/add-project", (req, res) =>
-  res.render("add-project", { title: "Add Project" }),
-);
-
-// --- CREATE WITH VALIDATION & ERROR HANDLING ---
-app.post("/project", async (req, res) => {
-  try {
-    const data = formatProjectPayload(req.body);
-
-    // 1. Validation Logic
-    console.log("LOG: Validating project payload...");
-    if (!data.title || !data.content || !data.startDate || !data.endDate) {
-      console.error(
-        "ALERT: Project creation failed. Required fields are missing.",
-      );
-      return res.redirect("/add-project");
-    }
-
-    if (new Date(data.startDate) > new Date(data.endDate)) {
-      console.error("ALERT: Invalid date range. Start date is after end date.");
-      return res.redirect("/add-project");
-    }
-
-    // 2. Database Action
-    const query = `INSERT INTO projects (title, content, start_date, end_date, duration, image, author_id, technologies) 
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
-    const values = [
-      data.title,
-      data.content,
-      data.startDate,
-      data.endDate,
-      data.duration,
-      data.image,
-      1,
-      data.technologies,
-    ];
-
-    await pool.query(query, values);
-    console.log("SUCCESS: New project added to PostgreSQL database.");
-    res.redirect("/project");
-  } catch (err) {
-    // 3. Proper Error Handling
-    console.error(`ERROR: Critical failure in POST /project -> ${err.message}`);
-    res.status(500).send("Internal Server Error: Failed to save project.");
-  }
-});
-
-app.get("/edit-project/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query("SELECT * FROM projects WHERE id = $1", [
-      id,
-    ]);
-
-    if (result.rows.length === 0) {
-      console.error(`ALERT: Project with ID ${id} was not found.`);
-      return res.redirect("/project");
-    }
-
-    res.render("edit-project", {
-      title: "Edit Project",
+    res.render("project-detail", {
+      title: "Project Detail",
       project: result.rows[0],
     });
   } catch (err) {
-    console.error(
-      `ERROR: Database fetch failure in GET /edit-project -> ${err.message}`,
-    );
     res.redirect("/project");
   }
 });
 
-// --- UPDATE WITH VALIDATION & ERROR HANDLING ---
-app.post("/update-project/:id", async (req, res) => {
+app.get("/add-project", authGuard, (req, res) =>
+  res.render("add-project", { title: "Add Project" }),
+);
+
+app.post("/project", authGuard, async (req, res) => {
+  const p = formatProjectPayload(req.body, req.session.user.id);
+  await pool.query(
+    `INSERT INTO projects (title, content, start_date, end_date, duration, image, author_id, technologies) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+    [
+      p.title,
+      p.content,
+      p.start_date,
+      p.end_date,
+      p.duration,
+      p.image,
+      p.author_id,
+      p.technologies,
+    ],
+  );
+  req.flash("success", "Project added successfully!");
+  res.redirect("/project");
+});
+
+app.post("/update-project/:id", authGuard, async (req, res) => {
   try {
     const { id } = req.params;
-    const data = formatProjectPayload(req.body);
-
-    // Validation
-    if (!data.title || !data.content) {
-      console.error(
-        `ALERT: Update failed. Title or content cannot be empty for ID: ${id}`,
-      );
-      return res.redirect(`/edit-project/${id}`);
-    }
-
-    const query = `UPDATE projects SET title=$1, content=$2, start_date=$3, end_date=$4, duration=$5, image=$6, technologies=$7 
-                   WHERE id=$8`;
-    const values = [
-      data.title,
-      data.content,
-      data.startDate,
-      data.endDate,
-      data.duration,
-      data.image,
-      data.technologies,
+    const p = formatProjectPayload(req.body, req.session.user.id);
+    const query = `UPDATE projects SET title=$1, content=$2, start_date=$3, end_date=$4, duration=$5, image=$6, technologies=$7 WHERE id=$8`;
+    await pool.query(query, [
+      p.title,
+      p.content,
+      p.start_date,
+      p.end_date,
+      p.duration,
+      p.image,
+      p.technologies,
       id,
-    ];
-
-    const result = await pool.query(query, values);
-
-    if (result.rowCount === 0) {
-      console.error(
-        `ALERT: No rows affected. Project ID ${id} might not exist.`,
-      );
-      return res.redirect("/project");
-    }
-
-    console.log(`SUCCESS: Project ID ${id} has been updated.`);
+    ]);
+    req.flash("success", "Project updated successfully!");
     res.redirect("/project");
   } catch (err) {
-    console.error(
-      `ERROR: Update operation failed in POST /update-project -> ${err.message}`,
-    );
-    res.status(500).send("Internal Server Error: Failed to update project.");
+    req.flash("error", "Update failed: " + err.message);
+    res.redirect(`/edit-project/${req.params.id}`);
   }
 });
 
-// --- DELETE WITH ERROR HANDLING ---
-app.get("/delete-project/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query("DELETE FROM projects WHERE id = $1", [id]);
-
-    if (result.rowCount === 0) {
-      console.error(`ALERT: Delete failed. Project ID ${id} was not found.`);
-    } else {
-      console.log(`SUCCESS: Project ID ${id} deleted from database.`);
-    }
-
-    res.redirect("/project");
-  } catch (err) {
-    console.error(
-      `ERROR: Delete operation failed in GET /delete-project -> ${err.message}`,
-    );
-    res.status(500).send("Internal Server Error: Failed to delete project.");
+// PERBAIKAN: Memastikan technologies adalah array agar isChecked bekerja
+app.get("/edit-project/:id", authGuard, async (req, res) => {
+  const result = await pool.query("SELECT * FROM projects WHERE id = $1", [
+    req.params.id,
+  ]);
+  const project = result.rows[0];
+  if (project && !Array.isArray(project.technologies)) {
+    project.technologies = project.technologies ? [project.technologies] : [];
   }
+  res.render("edit-project", { title: "Edit Project", project });
+});
+
+app.get("/delete-project/:id", authGuard, async (req, res) => {
+  await pool.query("DELETE FROM projects WHERE id = $1", [req.params.id]);
+  req.flash("success", "Project deleted successfully!");
+  res.redirect("/project");
 });
 
 /**
- * @section 5. ERROR HANDLING & SERVER ACTIVATION
+ * @section 5. SERVER
  */
-app.use((req, res) => res.status(404).send("Page not found."));
+app.use((req, res) =>
+  res.status(404).render("404", { title: "404 Not Found" }),
+);
 
-app.listen(port, () => {
-  const now = new Date();
-  console.log(`
-  🚀 ManadoCode Server Is Live!
-  -----------------------------
-  URL  : http://localhost:${port}
-  Date : ${now.toLocaleDateString("en-US")}, ${now.toLocaleTimeString("en-US")}
-  -----------------------------
-  `);
-});
+app.listen(port, () =>
+  console.log(`🚀 Server running at http://localhost:${port}`),
+);

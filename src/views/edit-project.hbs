@@ -1,17 +1,81 @@
 <section class="add-project">
   <h1>EDIT PROJECT</h1>
   <div class="form-box">
-    {{! Form mengarah ke update-project dengan ID }}
     <form
       class="form-flex"
       action="/update-project/{{project.id}}"
       method="POST"
     >
+
+      <input type="hidden" name="oldImage" value="{{project.image}}" />
+
       <label>Project Name</label>
       <input type="text" name="title" value="{{project.title}}" required />
 
       <label>Description</label>
       <textarea name="content" required>{{project.content}}</textarea>
+
+      <div class="input-date-flex">
+        <div class="input-date">
+          <label>Start Date</label>
+          <input
+            type="date"
+            name="startDate"
+            value="{{formatInputDate project.start_date}}"
+            required
+          />
+        </div>
+        <div class="input-date">
+          <label>End Date</label>
+          <input
+            type="date"
+            name="endDate"
+            value="{{formatInputDate project.end_date}}"
+            required
+          />
+        </div>
+      </div>
+
+      <label>Technologies</label>
+      <div class="checkbox-flex">
+        {{! Pastikan value di sini sama persis dengan yang ada di index.js }}
+        <label>
+          <input
+            type="checkbox"
+            name="node"
+            value="Node Js"
+            {{isChecked project.technologies "Node Js"}}
+          />
+          Node Js
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="next"
+            value="Next Js"
+            {{isChecked project.technologies "Next Js"}}
+          />
+          Next Js
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="react"
+            value="React Js"
+            {{isChecked project.technologies "React Js"}}
+          />
+          React Js
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="ts"
+            value="TypeScript"
+            {{isChecked project.technologies "TypeScript"}}
+          />
+          TypeScript
+        </label>
+      </div>
 
       <button type="submit" class="btn-submit">Save Changes</button>
     </form>

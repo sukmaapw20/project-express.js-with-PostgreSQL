@@ -932,3 +932,70 @@ textarea {
   color: #eeeeee; /* Putih bersih agar terbaca */
   max-width: 800px;
 }
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+  background-color: #111; /* Hitam pekat sesuai tema */
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Memberi jarak antar menu */
+}
+
+.nav-auth {
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.nav-auth:hover {
+  color: #ff5f00; /* Warna orange saat hover */
+}
+
+.btn-contact-nav {
+  background-color: #333;
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  text-decoration: none;
+  border: 1px solid #555;
+  transition: 0.3s;
+}
+
+.btn-contact-nav:hover {
+  background-color: white;
+  color: black;
+}
+
+/* Pastikan teks di dalam card terlihat jelas */
+.card {
+  background-color: #1e1e1e !important; /* Warna kartu sedikit lebih terang dari bg utama */
+  color: #ffffff !important;
+  border: 1px solid #333;
+}
+
+.card h2,
+.card h3 {
+  color: #ffffff !important;
+  font-weight: bold;
+}
+
+.form-label {
+  color: #e0e0e0 !important; /* Warna abu-abu terang untuk label input */
+}
+
+.text-muted {
+  color: #b0b0b0 !important; /* Warna untuk teks "Already have an account?" */
+}
+
+/* Supaya link Register/Login here lebih terlihat */
+.card a {
+  color: #ff5f00 !important; /* Warna orange khas ManadoCode */
+}

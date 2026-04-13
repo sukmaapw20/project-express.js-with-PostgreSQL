@@ -7,13 +7,20 @@
     </div>
 
     <div class="detail-right">
+      {{! English labels for consistency }}
       <h3>Duration</h3>
+
       <div class="info-item">
         <i class="fa-solid fa-calendar-days"></i>
-        <span>{{project.start_date}} - {{project.end_date}}</span>
+        {{! Using formatInputDate helper here makes the display cleaner }}
+        <span>{{formatInputDate project.start_date}}
+          -
+          {{formatInputDate project.end_date}}</span>
       </div>
+
       <div class="info-item">
         <i class="fa-solid fa-clock"></i>
+        {{! Shows the calculated string like "Less than a day" or "X months" }}
         <span>{{project.duration}}</span>
       </div>
 
@@ -21,7 +28,6 @@
       <div class="detail-tech">
         {{#each project.technologies}}
           <div class="tech-item">
-            {{! Kamu bisa tambahkan logika icon di sini jika mau }}
             <span>{{this}}</span>
           </div>
         {{/each}}
@@ -30,6 +36,7 @@
   </div>
 
   <div class="description">
+    {{! The project content/description }}
     <p>{{project.content}}</p>
   </div>
 </div>

@@ -1,11 +1,23 @@
 <nav class="navbar">
   <div class="nav-left">
-    <h3 class="logo">ManadoCode</h3>
+    <h3 class="logo">MANADOCODE</h3>
     <div class="nav-menu">
       <a href="/">Home</a>
-      <a href="/add-project">Add Project</a>
       <a href="/project">Projects</a>
+      {{#if isLogin}}
+        <a href="/add-project">Add Project</a>
+      {{/if}}
     </div>
   </div>
-  <a href="/contact" class="btn-contact-nav">Contact</a>
+
+  <div class="nav-right">
+    {{#if isLogin}}
+      <span class="user-greet">Hi, {{user.name}}</span>
+      <a href="/logout" class="nav-auth">Logout</a>
+    {{else}}
+      <a href="/register" class="nav-auth">Register</a>
+      <a href="/login" class="nav-auth">Login</a>
+    {{/if}}
+    <a href="/contact" class="btn-contact-nav">Contact</a>
+  </div>
 </nav>

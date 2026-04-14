@@ -1,7 +1,13 @@
 <section class="add-project">
   <h1>ADD MY PROJECT</h1>
   <div class="form-box">
-    <form class="form-flex" action="/project" method="POST">
+    {{! TAMBAHKAN enctype di bawah ini }}
+    <form
+      class="form-flex"
+      action="/project"
+      method="POST"
+      enctype="multipart/form-data"
+    >
       <label>Project Name</label>
       <input type="text" name="title" required />
 
@@ -32,7 +38,8 @@
       </div>
 
       <label>Upload Image</label>
-      <input type="file" name="image" />
+      {{! Pastikan atribut 'name' di sini sama dengan yang ada di upload.single("image") }}
+      <input type="file" name="image" required />
 
       <button type="submit" class="btn-submit">Submit</button>
     </form>

@@ -6,7 +6,10 @@ import session from "express-session";
 import bcrypt from "bcrypt";
 import flash from "req-flash";
 import cookieParser from "cookie-parser";
+import fs from "fs";
+import multer from "multer";
 import pool from "./src/config/db.js";
+import upload from "./src/middlewares/uploadFile.js";
 
 const app = express();
 const port = 3000;
@@ -117,7 +120,6 @@ app.set("views", path.join(__dirname, "src/views"));
 app.get("/register", (req, res) =>
   res.render("register", { title: "Register" }),
 );
-
 app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -135,7 +137,6 @@ app.post("/register", async (req, res) => {
 });
 
 app.get("/login", (req, res) => res.render("login", { title: "Login" }));
-
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -166,12 +167,7 @@ app.get("/logout", (req, res) => {
 app.get("/contact", (req, res) =>
   res.render("contact", { title: "Contact Me" }),
 );
-
-// PERBAIKAN: Route contact post sekarang merender halaman sukses
 app.post("/contact", (req, res) => {
-  const { name, email, message } = req.body;
-  console.log(`Log: Message from ${name}: ${message}`);
-
   res.render("contact-success", {
     title: "Sent Successfully",
     message: "Thank you for reaching out! I will get back to you soon.",
@@ -193,11 +189,12 @@ app.get("/project", async (req, res) => {
 app.get("/project-detail/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const query = `SELECT p.*, u.name as author_name FROM projects p LEFT JOIN users u ON p.author_id = u.id WHERE p.id = $1`;
-    const result = await pool.query(query, [id]);
+    const result = await pool.query(
+      `SELECT p.*, u.name as author_name FROM projects p LEFT JOIN users u ON p.author_id = u.id WHERE p.id = $1`,
+      [id],
+    );
     if (result.rows.length === 0)
       return res.status(404).render("404", { title: "Project Not Found" });
-
     res.render("project-detail", {
       title: "Project Detail",
       project: result.rows[0],
@@ -211,49 +208,64 @@ app.get("/add-project", authGuard, (req, res) =>
   res.render("add-project", { title: "Add Project" }),
 );
 
-app.post("/project", authGuard, async (req, res) => {
-  const p = formatProjectPayload(req.body, req.session.user.id);
-  await pool.query(
-    `INSERT INTO projects (title, content, start_date, end_date, duration, image, author_id, technologies) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-    [
-      p.title,
-      p.content,
-      p.start_date,
-      p.end_date,
-      p.duration,
-      p.image,
-      p.author_id,
-      p.technologies,
-    ],
-  );
-  req.flash("success", "Project added successfully!");
-  res.redirect("/project");
-});
-
-app.post("/update-project/:id", authGuard, async (req, res) => {
+app.post("/project", authGuard, upload.single("image"), async (req, res) => {
   try {
-    const { id } = req.params;
     const p = formatProjectPayload(req.body, req.session.user.id);
-    const query = `UPDATE projects SET title=$1, content=$2, start_date=$3, end_date=$4, duration=$5, image=$6, technologies=$7 WHERE id=$8`;
-    await pool.query(query, [
-      p.title,
-      p.content,
-      p.start_date,
-      p.end_date,
-      p.duration,
-      p.image,
-      p.technologies,
-      id,
-    ]);
-    req.flash("success", "Project updated successfully!");
+    p.image = req.file ? req.file.filename : "default-project.png";
+
+    await pool.query(
+      `INSERT INTO projects (title, content, start_date, end_date, duration, image, author_id, technologies) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        p.title,
+        p.content,
+        p.start_date,
+        p.end_date,
+        p.duration,
+        p.image,
+        p.author_id,
+        p.technologies,
+      ],
+    );
+    req.flash("success", "Project added successfully!");
     res.redirect("/project");
   } catch (err) {
-    req.flash("error", "Update failed: " + err.message);
-    res.redirect(`/edit-project/${req.params.id}`);
+    req.flash("error", err.message);
+    res.redirect("/add-project");
   }
 });
 
-// PERBAIKAN: Memastikan technologies adalah array agar isChecked bekerja
+app.post(
+  "/update-project/:id",
+  authGuard,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const p = formatProjectPayload(req.body, req.session.user.id);
+      p.image = req.file ? req.file.filename : req.body.oldImage;
+
+      await pool.query(
+        `UPDATE projects SET title=$1, content=$2, start_date=$3, end_date=$4, duration=$5, image=$6, technologies=$7 WHERE id=$8`,
+        [
+          p.title,
+          p.content,
+          p.start_date,
+          p.end_date,
+          p.duration,
+          p.image,
+          p.technologies,
+          id,
+        ],
+      );
+      req.flash("success", "Project updated successfully!");
+      res.redirect("/project");
+    } catch (err) {
+      req.flash("error", "Update failed: " + err.message);
+      res.redirect(`/edit-project/${req.params.id}`);
+    }
+  },
+);
+
 app.get("/edit-project/:id", authGuard, async (req, res) => {
   const result = await pool.query("SELECT * FROM projects WHERE id = $1", [
     req.params.id,
@@ -266,18 +278,55 @@ app.get("/edit-project/:id", authGuard, async (req, res) => {
 });
 
 app.get("/delete-project/:id", authGuard, async (req, res) => {
-  await pool.query("DELETE FROM projects WHERE id = $1", [req.params.id]);
-  req.flash("success", "Project deleted successfully!");
-  res.redirect("/project");
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      "SELECT image FROM projects WHERE id = $1",
+      [id],
+    );
+    const imageName = result.rows[0]?.image;
+
+    if (imageName && imageName !== "default-project.png") {
+      const filePath = path.join(__dirname, "src/assets/img", imageName);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
+
+    await pool.query("DELETE FROM projects WHERE id = $1", [id]);
+    req.flash("success", "Project deleted successfully!");
+    res.redirect("/project");
+  } catch (err) {
+    req.flash("error", "Delete failed");
+    res.redirect("/project");
+  }
 });
 
 /**
- * @section 5. SERVER
+ * @section 5. ERROR HANDLING MIDDLEWARE
+ * Handles Multer errors and general server errors
+ */
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      req.flash("error", "File too large! Maximum size allowed is 2MB.");
+    } else {
+      req.flash("error", `Upload Error: ${err.message}`);
+    }
+    return res.redirect(req.get("Referrer") || "/project");
+  }
+
+  if (err) {
+    req.flash("error", err.message);
+    return res.redirect(req.get("Referrer") || "/project");
+  }
+  next();
+});
+
+/**
+ * @section 6. SERVER
  */
 app.use((req, res) =>
   res.status(404).render("404", { title: "404 Not Found" }),
 );
-
 app.listen(port, () =>
   console.log(`🚀 Server running at http://localhost:${port}`),
 );
